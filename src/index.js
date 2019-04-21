@@ -4,6 +4,7 @@ import Chart from "chart.js";
 //const currencyURL = "www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
 //const meteoURL = "/xml.meteoservice.ru/export/gismeteo/point/140.xml";
 const meteoURL = "/xml.meteoservice.ru/export/gismeteo/point/140.xml";
+//не удалось вернуть массив объектов
 /*const resultatArray=new Array();
 async function loadCurrency() {
   const response = await fetch(meteoURL);
@@ -20,7 +21,6 @@ async function loadCurrency() {
   
   const resultForecast = Object.create(null);
   
-  const weakSet = new WeakSet();
   //прогрнозы
  
   for (let i = 0; i < forecasts.length; i++) {
@@ -66,28 +66,16 @@ async function loadCurrency() {
 const buttonBuild = document.getElementById("btn");
 const canvasCtx = document.getElementById("out").getContext("2d");
 buttonBuild.addEventListener("click", async function(){
-  //const currencyData1 = await loadCurrency();
-  //const normalData = normalizeDataByCurrency(currencyData, "RUB");
-  /*const keys = Object.keys(normalData).sort((k1, k2) =>
-    compare(normalData[k1], normalData[k2])
-  );*/
-//начало куска
+//начало получаем и парсим
   const response = await fetch(meteoURL);
-  
   const xmlTest = await response.text();
-  
   const parser = new DOMParser();
 
   const meteoData = parser.parseFromString(xmlTest, "text/xml");
-  // <Cube currency="USD" rate="1.1321" />
-  const forecasts = meteoData.querySelectorAll("FORECAST[hour]");
-  const temperatures = meteoData.querySelectorAll("TEMPERATURE[max][min]");
-  const heat = meteoData.querySelectorAll("HEAT[max][min]");
-  
-  const resultForecast = Object.create(null);
-  
-  const weakSet = new WeakSet();
-  //прогнозы
+  const forecasts = meteoData.querySelectorAll("FORECAST");
+  const temperatures = meteoData.querySelectorAll("TEMPERATURE");
+  const heat = meteoData.querySelectorAll("HEAT");
+ 
   const arrLabels = new Array();
   const arrTemp = new Array();
   const arrHeat = new Array();
@@ -110,44 +98,62 @@ buttonBuild.addEventListener("click", async function(){
     arrHeat[i]   = srHeat;
   }
     //конец
-
-  
- 
- // const keys = Object.keys(currencyData1);
-  //const plotData = Object.values(currencyData1); 
- // keys.map(key => resultForecast[key]);
   const labelsData = arrLabels;
   const plotData = arrTemp;
   const plotData1 = arrHeat;
-  //const plotData1 = ["+6","-5","+10","+5"];
-  //= keys.map(key => normalData[key]);
+  
   var dataFirst = {
-    label: "Температура воздуха по ощущениям",
-   // backgroundColor: "rgb(24, 240, 46)",
-    borderColor: "rgb(180, 0, 0)",
+    label: "Температура воздуха по ощущениям,С",
+    backgroundColor: "rgb(222, 40, 40)",
+    borderColor: "rgb(128, 5, 5)",
+    labelString: "Температура ,С",
     data: plotData1,
-    lineTension: 0.3,
-    // Set More Options
   };
      
   var dataSecond = {
-    label: "Температура воздуха в градусах,С",
-    //backgroundColor: "rgb(255, 20, 20)",
-    borderColor: "rgb(180, 200, 0)",
+    label: "Температура воздуха,С",
+    backgroundColor: "rgb(10, 204, 30)",
+    borderColor: "rgb(8, 153, 22)",
    // label: "Температура",
     data: plotData,
-    // Set More Options
-  };
+    };
 
   const chartConfig = {
     type: "line",
+    options:
+    {
+      scales: {
+        xAxes: [
+        {
+        gridLines: {
+          display: true,
+          color: "black",
+          borderDash: [2, 5],
+        },
+        scaleLabel: {
+          display: true,
+          fontColor:"grey",
+          labelString: "Время в часах",
+        }
+      }],
+      yAxes: [{
+        gridLines: {
+          color: "black",
+          display:true,
+          borderDash: [2, 5],
+        },
+        scaleLabel: {
+          display: true,
+          fontColor:"grey",
+          labelString: "Температура,C",
+        }
+      }]
+    }
+    },
 
     data: {
       labels: labelsData,
-      //labels: keys,
-     // labels:["21","03","09","15"],
-      datasets: [dataFirst,dataSecond]
-      
+      datasets: [dataFirst,dataSecond] 
     }
   };
 
@@ -162,7 +168,6 @@ buttonBuild.addEventListener("click", async function(){
     });
   } else {
     window.chart = new Chart(canvasCtx, chartConfig);
-    //window.chart = new Chart(canvasCtx, chartConfig);
   }
 });
 
